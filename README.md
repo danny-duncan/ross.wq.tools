@@ -1,31 +1,29 @@
 # ROSSyndicate Water Quality Tools
 
-Tools developed by the ROSSyndicate in order to analyze water quality time series data.
-
 ```mermaid
 graph TD
 	%% Ingest & API Entry Points
-	subgraph 1. Data Ingestion & API Layer
+	subgraph 1. Data Ingestion
 	API_HV[HydroVu API Cloud] -->|hv_auth| OAuth[OAuth Client Token]
 	OAuth -->|hv_locations_all| HV_Sites[HydroVu Location Metadata]
 	OAuth -->|api_puller| Pull_API[Download Parquet Chunks]
     
-    	%% Tracker subsystem
-    	Pull_API -->|update_hv_api_tracker| Tracker_File[(HV_Tracking.parquet)]
-    	Tracker_File -->|Auto-Disable / Retry| Pull_API
+    %% Tracker subsystem
+    Pull_API -->|update_hv_api_tracker| Tracker_File[(HV_Tracking.parquet)]
+    Tracker_File -->|Auto-Disable / Retry| Pull_API
 
-    	%% mWater subsystem
-    	API_MW[mWater API Platform] -->|load_mWater| MW_Raw[Raw Field Database]
-    	MW_Raw -->|grab_mWater_sensor_notes| Notes_Visit[Field Site Visit Notes]
-    	MW_Raw -->|grab_mWater_malfunction_notes| Notes_Mal[Sonde Malfunction Log]
-    	MW_Raw -->|grab_mWater_cleaning_notes| Notes_Clean[Sensor Cleaning Records]
+    %% mWater subsystem
+    API_MW[mWater API Platform] -->|load_mWater| MW_Raw[Raw Field Database]
+    MW_Raw -->|grab_mWater_sensor_notes| Notes_Visit[Field Site Visit Notes]
+    MW_Raw -->|grab_mWater_malfunction_notes| Notes_Mal[Sonde Malfunction Log]
+    MW_Raw -->|grab_mWater_cleaning_notes| Notes_Clean[Sensor Cleaning Records]
 
     %% Calibration Reports
     Cal_Logs[In-Situ HTML Reports] -->|cal_extract_markup_data| Cal_Collate[(munged_calibration_data.RDS)]
 end
 
 %% Preprocessing Layer
-subgraph 2. Preprocessing & Tidying Layer
+subgraph 2. Preprocessing & Tidying
     Pull_API -->|munge_api_data| Standardized_Raw[Raw Sensor Dataframe]
     Standardized_Raw -->|fix_site_names| Clean_Names[Standardized Site Names]
     Clean_Names -->|tidy_api_data| Aggregated_15[15-min Rounded Aggregates]
